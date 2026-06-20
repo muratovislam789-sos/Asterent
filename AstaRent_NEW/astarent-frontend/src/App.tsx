@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useChatStore } from '@/store/chatStore'
@@ -28,11 +28,23 @@ const LandlordRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
 export default function App() {
   const { checkAuth, isAuthenticated, token } = useAuthStore()
-  const { connect } = useChatStore()
+  const { connect, disconnect } = useChatStore()
+  const connectedRef = useRef(false)
 
   useEffect(() => { checkAuth() }, [])
+
   useEffect(() => {
-    if (isAuthenticated && token) connect(token)
+    if (isAuthenticated && token && !connectedRef.current) {
+      connectedRef.current = true
+      connect(token)
+    }
+    if (!isAuthenticated && connectedRef.current) {
+      connectedRef.current = false
+      disconnect()
+    }
+    return () => {
+      // Cleanup only on full unmount, not on every re-render
+    }
   }, [isAuthenticated, token])
 
   return (
