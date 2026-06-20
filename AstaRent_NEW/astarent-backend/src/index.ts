@@ -42,10 +42,39 @@ app.get('/api/health', async (_, res) => {
   }
 })
 
-app.use((_: any, res: any) => res.status(404).json({ success: false, error: 'Not found' }))
-app.use((err: any, _: any, res: any, __: any) => {
-  console.error(err)
-  res.status(500).json({ success: false, error: 'Internal server error' })
+// 404 — маршрут не найден
+app.use((_req: any, res: any) => {
+  res.status(404).json({ success: false, error: 'Маршрут не найден' })
+})
+
+// Глобальный обработчик ошибок — последняя линия защиты.
+// Ловит любую ошибку, не пойманную внутри контроллеров (например ошибки multer,
+// синтаксические ошибки в JSON теле запроса, неожиданные исключения).
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error('Unhandled error:', err)
+
+  // Ошибка лимита размера файла от multer
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ success: false, error: 'Файл слишком большой (максимум 5 МБ)' })
+  }
+
+  // Ошибка некорректного JSON в теле запроса
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, error: 'Некорректный формат данных запроса' })
+  }
+
+  res.status(err.statusCode || 500).json({
+    success: false,
+    error: err.message || 'Внутренняя ошибка сервера',
+  })
+})
+
+// Перехват необработанных исключений и промисов — чтобы процесс не падал молча
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason)
+})
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err)
 })
 
 // WebSocket
@@ -86,7 +115,9 @@ io.on('connection', (socket) => {
   })
 
   socket.on('mark_read', async ({ chatId }: { chatId: string }) => {
-    try { await chatRepository.markAsRead(chatId, userId) } catch { }
+    try { await chatRepository.markAsRead(chatId, userId) } catch (err) {
+      console.error('Mark read error:', err)
+    }
   })
 })
 
