@@ -7,9 +7,9 @@ export interface AuthRequest extends Request {
   userRole?: string
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = (req: any, res: Response, next: NextFunction) => {
   const auth = req.headers.authorization
-  if (!auth?.startsWith('Bearer ')) return sendError(res, 'Необходима авторизация', 401)
+  if (!auth || !auth.startsWith('Bearer ')) return sendError(res, 'Необходима авторизация', 401)
 
   try {
     const payload = verifyToken(auth.slice(7))
@@ -21,7 +21,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   }
 }
 
-export const requireRole = (role: string) => (req: AuthRequest, res: Response, next: NextFunction) => {
+export const requireRole = (role: string) => (req: any, res: Response, next: NextFunction) => {
   if (req.userRole !== role) return sendError(res, 'Недостаточно прав', 403)
   next()
 }
