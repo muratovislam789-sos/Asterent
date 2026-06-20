@@ -1,6 +1,3 @@
-import dotenv from "dotenv"
-dotenv.config()
-
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -89,7 +86,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('mark_read', async ({ chatId }: { chatId: string }) => {
-    try { await chatRepository.markAsRead(chatId, userId) } catch {}
+    try { await chatRepository.markAsRead(chatId, userId) } catch { }
   })
 })
 
@@ -100,7 +97,7 @@ const start = async () => {
     await pool.query('SELECT 1')
     await connectRedis()
     httpServer.listen(PORT, () => {
-      console.log(`✅ AstaRent server running on http://localhost:${PORT}`)
+      console.log(`AstaRent server running on port ${PORT}`)
     })
   } catch (err) {
     console.error('Failed to start:', err)

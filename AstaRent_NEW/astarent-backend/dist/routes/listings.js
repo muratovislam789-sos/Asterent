@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const listingController_1 = require("../controllers/listingController");
+const auth_1 = require("../middleware/auth");
+const upload_1 = require("../middleware/upload");
+const router = (0, express_1.Router)();
+router.get('/', listingController_1.listingController.getAll);
+router.get('/my', auth_1.authenticate, (0, auth_1.requireRole)('landlord'), listingController_1.listingController.getMyListings);
+router.get('/favorites', auth_1.authenticate, listingController_1.listingController.getFavorites);
+router.get('/:id', listingController_1.listingController.getById);
+router.post('/', auth_1.authenticate, (0, auth_1.requireRole)('landlord'), upload_1.upload.array('photos', 10), listingController_1.listingController.create);
+router.put('/:id', auth_1.authenticate, (0, auth_1.requireRole)('landlord'), upload_1.upload.array('photos', 10), listingController_1.listingController.update);
+router.delete('/:id', auth_1.authenticate, (0, auth_1.requireRole)('landlord'), listingController_1.listingController.delete);
+router.post('/:id/favorite', auth_1.authenticate, listingController_1.listingController.toggleFavorite);
+exports.default = router;
