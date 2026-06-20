@@ -3,20 +3,22 @@ import path from 'path'
 import { v4 as uuid } from 'uuid'
 
 const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, process.env.UPLOAD_DIR || 'uploads'),
-  filename: (_, file, cb) => {
+  destination: function (_req, _file, cb) {
+    cb(null, process.env.UPLOAD_DIR || 'uploads')
+  },
+  filename: function (_req, file, cb) {
     const ext = path.extname(file.originalname)
     cb(null, uuid() + ext)
   },
 })
 
-const fileFilter = (_: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = function (_req: any, file: any, cb: any) {
   const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
   cb(null, allowed.includes(file.mimetype))
 }
 
 export const upload = multer({
-  storage,
-  fileFilter,
+  storage: storage,
+  fileFilter: fileFilter,
   limits: { fileSize: Number(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, files: 10 },
 })
