@@ -69,7 +69,8 @@ export const authController = {
 
   async updateProfile(req: any, res: Response) {
     const { name, phone } = req.body
-    const avatar = req.file ? `/uploads/${req.file.filename}` : undefined
+    // Cloudinary multer stores the full URL in file.path
+    const avatar = req.file ? req.file.path : undefined
     const updated = await userRepository.update(req.userId, { ...(name && { name }), ...(phone && { phone }), ...(avatar && { avatar }) })
     return sendSuccess(res, updated)
   }
