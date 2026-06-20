@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import { userRepository } from '../repositories/userRepository'
 import { signToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt'
 import { sendSuccess, sendError } from '../utils/response'
-import { AuthRequest } from '../middleware/auth'
 import redisClient from '../config/redis'
 
 export const authController = {
@@ -57,21 +56,21 @@ export const authController = {
     }
   },
 
-  async logout(req: AuthRequest, res: Response) {
+  async logout(req: any, res: Response) {
     if (req.userId) await redisClient.del(`refresh:${req.userId}`)
     return sendSuccess(res, null, 200, 'Logged out')
   },
 
-  async getMe(req: AuthRequest, res: Response) {
-    const user = await userRepository.findById(req.userId!)
+  async getMe(req: any, res: Response) {
+    const user = await userRepository.findById(req.userId)
     if (!user) return sendError(res, 'User not found', 404)
     return sendSuccess(res, user)
   },
 
-  async updateProfile(req: AuthRequest, res: Response) {
+  async updateProfile(req: any, res: Response) {
     const { name, phone } = req.body
-    const avatar = (req as any).file ? `/uploads/${(req as any).file.filename}` : undefined
-    const updated = await userRepository.update(req.userId!, { ...(name && { name }), ...(phone && { phone }), ...(avatar && { avatar }) })
+    const avatar = req.file ? `/uploads/${req.file.filename}` : undefined
+    const updated = await userRepository.update(req.userId, { ...(name && { name }), ...(phone && { phone }), ...(avatar && { avatar }) })
     return sendSuccess(res, updated)
   }
 }
