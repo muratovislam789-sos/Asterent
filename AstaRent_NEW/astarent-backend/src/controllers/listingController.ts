@@ -21,7 +21,8 @@ export const listingController = {
 
   async create(req: any, res: Response) {
     const files = (req.files || []) as any[]
-    const photos = files.map((f: any) => `/uploads/${f.filename}`)
+    // Cloudinary multer stores the full URL in file.path
+    const photos = files.map((f: any) => f.path)
     if (!req.body.title || !req.body.price || !req.body.district || !req.body.address || !req.body.area) {
       return sendError(res, 'Заполните все обязательные поля')
     }
@@ -34,7 +35,7 @@ export const listingController = {
     if (!existing) return sendError(res, 'Объявление не найдено', 404)
     if (existing.landlord.id !== req.userId) return sendError(res, 'Нет прав на редактирование', 403)
     const files = (req.files || []) as any[]
-    const newPhotos = files.map((f: any) => `/uploads/${f.filename}`)
+    const newPhotos = files.map((f: any) => f.path)
     const listing = await listingRepository.update(req.params.id, req.body, newPhotos.length > 0 ? newPhotos : undefined)
     return sendSuccess(res, listing)
   },
