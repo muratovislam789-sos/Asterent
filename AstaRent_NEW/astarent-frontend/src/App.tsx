@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '@/store/authStore'
 import { useChatStore } from '@/store/chatStore'
 import Header from '@/components/layout/Header'
+import PageTransition from '@/components/ui/PageTransition'
 import HomePage from '@/pages/HomePage'
 import ListingsPage from '@/pages/ListingsPage'
 import ListingDetailPage from '@/pages/ListingDetailPage'
@@ -26,6 +28,29 @@ const LandlordRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   return <>{children}</>
 }
 
+function AnimatedRoutes() {
+  const location = useLocation()
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
+        <Route path="/listings" element={<PageTransition><ListingsPage /></PageTransition>} />
+        <Route path="/listings/:id" element={<PageTransition><ListingDetailPage /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
+        <Route path="/register" element={<PageTransition><RegisterPage /></PageTransition>} />
+        <Route path="/listings/create" element={<LandlordRoute><PageTransition><CreateListingPage /></PageTransition></LandlordRoute>} />
+        <Route path="/listings/edit/:id" element={<LandlordRoute><PageTransition><CreateListingPage /></PageTransition></LandlordRoute>} />
+        <Route path="/favorites" element={<PrivateRoute><PageTransition><FavoritesPage /></PageTransition></PrivateRoute>} />
+        <Route path="/chats" element={<PrivateRoute><PageTransition><ChatsPage /></PageTransition></PrivateRoute>} />
+        <Route path="/chats/:id" element={<PrivateRoute><PageTransition><ChatsPage /></PageTransition></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><PageTransition><ProfilePage /></PageTransition></PrivateRoute>} />
+        <Route path="/my-listings" element={<LandlordRoute><PageTransition><MyListingsPage /></PageTransition></LandlordRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  )
+}
+
 export default function App() {
   const { checkAuth, isAuthenticated, token } = useAuthStore()
   const { connect, disconnect } = useChatStore()
@@ -42,9 +67,6 @@ export default function App() {
       connectedRef.current = false
       disconnect()
     }
-    return () => {
-      // Cleanup only on full unmount, not on every re-render
-    }
   }, [isAuthenticated, token])
 
   return (
@@ -52,21 +74,7 @@ export default function App() {
       <div className="min-h-screen bg-bg flex flex-col">
         <Header />
         <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/listings" element={<ListingsPage />} />
-            <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/listings/create" element={<LandlordRoute><CreateListingPage /></LandlordRoute>} />
-            <Route path="/listings/edit/:id" element={<LandlordRoute><CreateListingPage /></LandlordRoute>} />
-            <Route path="/favorites" element={<PrivateRoute><FavoritesPage /></PrivateRoute>} />
-            <Route path="/chats" element={<PrivateRoute><ChatsPage /></PrivateRoute>} />
-            <Route path="/chats/:id" element={<PrivateRoute><ChatsPage /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-            <Route path="/my-listings" element={<LandlordRoute><MyListingsPage /></LandlordRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AnimatedRoutes />
         </main>
       </div>
     </BrowserRouter>
