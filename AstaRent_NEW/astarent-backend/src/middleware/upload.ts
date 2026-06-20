@@ -1,14 +1,15 @@
 import multer from 'multer'
-import path from 'path'
-import { v4 as uuid } from 'uuid'
+import { CloudinaryStorage } from 'multer-storage-cloudinary'
+import cloudinary from '../config/cloudinary'
 
-const storage = multer.diskStorage({
-  destination: function (_req, _file, cb) {
-    cb(null, process.env.UPLOAD_DIR || 'uploads')
-  },
-  filename: function (_req, file, cb) {
-    const ext = path.extname(file.originalname)
-    cb(null, uuid() + ext)
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async () => {
+    return {
+      folder: 'astarent',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+      transformation: [{ width: 1200, height: 900, crop: 'limit' }],
+    }
   },
 })
 
