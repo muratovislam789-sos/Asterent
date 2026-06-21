@@ -16,7 +16,15 @@ export const listingRepository = {
     if (filters.washer === 'true') { conditions.push(`l.amenities->>'washer' = 'true'`) }
 
     const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : ''
-    const sortMap: any = { price_asc: 'l.price ASC', price_desc: 'l.price DESC', newest: 'l.created_at DESC' }
+
+    // Сортировка по рейтингу учитывает средний рейтинг арендодателя (через LEFT JOIN на reviews).
+    // Объявления арендодателей без отзывов уходят в конец (COALESCE с 0).
+    const sortMap: any = {
+      price_asc: 'l.price ASC',
+      price_desc: 'l.price DESC',
+      newest: 'l.created_at DESC',
+      rating: 'avg_landlord_rating DESC NULLS LAST, l.created_at DESC',
+    }
     const orderBy = sortMap[filters.sortBy] || 'l.created_at DESC'
 
     const limit = Math.min(Number(filters.limit) || 12, 50)
@@ -30,10 +38,15 @@ export const listingRepository = {
     const total = Number(countRes.rows[0].count)
 
     const res = await pool.query(`
-      SELECT l.*, u.id as landlord_id, u.name as landlord_name, u.email as landlord_email, u.phone as landlord_phone, u.avatar as landlord_avatar, u.role as landlord_role ${favSelect}
+      SELECT l.*, u.id as landlord_id, u.name as landlord_name, u.email as landlord_email, u.phone as landlord_phone, u.avatar as landlord_avatar, u.role as landlord_role ${favSelect},
+        COALESCE(rv.avg_rating, 0) as avg_landlord_rating, COALESCE(rv.review_count, 0) as landlord_review_count
       FROM listings l
       JOIN users u ON u.id = l.landlord_id
       ${favJoin}
+      LEFT JOIN (
+        SELECT landlord_id, AVG(rating) as avg_rating, COUNT(*) as review_count
+        FROM reviews GROUP BY landlord_id
+      ) rv ON rv.landlord_id = l.landlord_id
       ${where}
       ORDER BY ${orderBy}
       LIMIT ${limit} OFFSET ${offset}
@@ -47,8 +60,13 @@ export const listingRepository = {
     const favSelect = userId ? `, CASE WHEN f.user_id IS NOT NULL THEN true ELSE false END as is_favorited` : ', false as is_favorited'
     const favJoin = userId ? `LEFT JOIN favorites f ON f.listing_id = l.id AND f.user_id = '${userId}'` : ''
     const { rows } = await pool.query(`
-      SELECT l.*, u.id as landlord_id, u.name as landlord_name, u.email as landlord_email, u.phone as landlord_phone, u.avatar as landlord_avatar, u.role as landlord_role ${favSelect}
+      SELECT l.*, u.id as landlord_id, u.name as landlord_name, u.email as landlord_email, u.phone as landlord_phone, u.avatar as landlord_avatar, u.role as landlord_role ${favSelect},
+        COALESCE(rv.avg_rating, 0) as avg_landlord_rating, COALESCE(rv.review_count, 0) as landlord_review_count
       FROM listings l JOIN users u ON u.id = l.landlord_id ${favJoin}
+      LEFT JOIN (
+        SELECT landlord_id, AVG(rating) as avg_rating, COUNT(*) as review_count
+        FROM reviews GROUP BY landlord_id
+      ) rv ON rv.landlord_id = l.landlord_id
       WHERE l.id = $1
     `, [id])
     if (!rows[0]) return null
@@ -119,7 +137,9 @@ function formatListing(row: any) {
     createdAt: row.created_at, updatedAt: row.updated_at,
     landlord: {
       id: row.landlord_id, name: row.landlord_name, email: row.landlord_email,
-      phone: row.landlord_phone, avatar: row.landlord_avatar, role: row.landlord_role
+      phone: row.landlord_phone, avatar: row.landlord_avatar, role: row.landlord_role,
+      averageRating: row.avg_landlord_rating !== undefined ? Number(parseFloat(row.avg_landlord_rating).toFixed(1)) : undefined,
+      reviewCount: row.landlord_review_count !== undefined ? Number(row.landlord_review_count) : undefined,
     }
   }
 }
