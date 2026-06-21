@@ -14,6 +14,7 @@ import { chatRepository } from './repositories/chatRepository'
 import authRoutes from './routes/auth'
 import listingRoutes from './routes/listings'
 import chatRoutes from './routes/chats'
+import historyRoutes from './routes/history'
 
 const app = express()
 const httpServer = createServer(app)
@@ -32,6 +33,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
 app.use('/api/auth', authRoutes)
 app.use('/api/listings', listingRoutes)
 app.use('/api/chats', chatRoutes)
+app.use('/api/history', historyRoutes)
 
 app.get('/api/health', async (_, res) => {
   try {
@@ -42,13 +44,31 @@ app.get('/api/health', async (_, res) => {
   }
 })
 
-app.use((_: any, res: any) => res.status(404).json({ success: false, error: 'Not found' }))
-app.use((err: any, _: any, res: any, __: any) => {
-  console.error(err)
-  res.status(500).json({ success: false, error: 'Internal server error' })
+app.use((_req: any, res: any) => {
+  res.status(404).json({ success: false, error: 'Маршрут не найден' })
 })
 
-// WebSocket
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error('Unhandled error:', err)
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ success: false, error: 'Файл слишком большой (максимум 5 МБ)' })
+  }
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, error: 'Некорректный формат данных запроса' })
+  }
+  res.status(err.statusCode || 500).json({
+    success: false,
+    error: err.message || 'Внутренняя ошибка сервера',
+  })
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason)
+})
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err)
+})
+
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token
   if (!token) return next(new Error('Auth required'))
@@ -86,7 +106,9 @@ io.on('connection', (socket) => {
   })
 
   socket.on('mark_read', async ({ chatId }: { chatId: string }) => {
-    try { await chatRepository.markAsRead(chatId, userId) } catch { }
+    try { await chatRepository.markAsRead(chatId, userId) } catch (err) {
+      console.error('Mark read error:', err)
+    }
   })
 })
 

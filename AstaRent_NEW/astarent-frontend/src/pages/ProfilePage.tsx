@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { User, Mail, Phone, Heart, MessageCircle, FileText, LogOut, Camera } from 'lucide-react'
+import { User, Mail, Phone, Heart, MessageCircle, FileText, LogOut, Camera, History } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/api'
 
@@ -40,18 +40,18 @@ export default function ProfilePage() {
 
   const menuItems = [
     { to: '/favorites', icon: <Heart className="w-4 h-4" />, label: 'Избранные объявления' },
+    { to: '/history', icon: <History className="w-4 h-4" />, label: 'История просмотров' },
     { to: '/chats', icon: <MessageCircle className="w-4 h-4" />, label: 'Мои чаты' },
     ...(user?.role === 'landlord' ? [{ to: '/my-listings', icon: <FileText className="w-4 h-4" />, label: 'Мои объявления' }] : []),
   ]
 
-  const avatarSrc = avatarPreview || (user?.avatar ? `http://localhost:5000${user.avatar}` : null)
+  const avatarSrc = avatarPreview || user?.avatar || null
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Мой профиль</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        {/* Left */}
         <div className="space-y-4">
           <div className="card p-6 text-center">
             <div className="relative w-20 h-20 mx-auto mb-3">
@@ -88,7 +88,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Right */}
         <div className="md:col-span-2 card p-6">
           <h2 className="font-bold text-gray-900 mb-5">Личные данные</h2>
           <form onSubmit={handleSave} className="space-y-4">

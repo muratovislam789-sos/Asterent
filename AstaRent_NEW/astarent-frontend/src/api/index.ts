@@ -8,7 +8,6 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach JWT token to every request
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('token');
   if (token && config.headers) {
@@ -17,7 +16,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// Handle 401 — refresh token flow
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -42,65 +40,49 @@ api.interceptors.response.use(
   }
 );
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
-
 export const authApi = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
-
   register: (data: { name: string; email: string; password: string; role: string }) =>
     api.post('/auth/register', data),
-
   logout: () => api.post('/auth/logout'),
-
   getMe: () => api.get('/auth/me'),
-
   updateProfile: (data: FormData) =>
     api.put('/auth/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
-// ─── Listings ─────────────────────────────────────────────────────────────────
-
 export const listingsApi = {
   getAll: (params?: Record<string, unknown>) =>
     api.get('/listings', { params }),
-
   getById: (id: string) =>
     api.get(`/listings/${id}`),
-
   create: (data: FormData) =>
     api.post('/listings', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-
   update: (id: string, data: FormData) =>
     api.put(`/listings/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-
   delete: (id: string) =>
     api.delete(`/listings/${id}`),
-
   getMyListings: () =>
     api.get('/listings/my'),
-
   getFavorites: () =>
     api.get('/listings/favorites'),
-
   toggleFavorite: (id: string) =>
     api.post(`/listings/${id}/favorite`),
 };
 
-// ─── Chats ────────────────────────────────────────────────────────────────────
-
 export const chatsApi = {
   getAll: () => api.get('/chats'),
-
   getById: (id: string) => api.get(`/chats/${id}`),
-
   startChat: (listingId: string) => api.post('/chats', { listingId }),
-
   getMessages: (chatId: string, page = 1) =>
     api.get(`/chats/${chatId}/messages`, { params: { page } }),
-
   sendMessage: (chatId: string, text: string) =>
     api.post(`/chats/${chatId}/messages`, { text }),
+};
+
+export const historyApi = {
+  getAll: () => api.get('/history'),
+  clear: () => api.delete('/history'),
 };
 
 export default api;
