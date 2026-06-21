@@ -15,6 +15,7 @@ import FavoritesPage from '@/pages/FavoritesPage'
 import ChatsPage from '@/pages/ChatsPage'
 import ProfilePage from '@/pages/ProfilePage'
 import MyListingsPage from '@/pages/MyListingsPage'
+import HistoryPage from '@/pages/HistoryPage'
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuthStore()
@@ -41,6 +42,7 @@ function AnimatedRoutes() {
         <Route path="/listings/create" element={<LandlordRoute><PageTransition><CreateListingPage /></PageTransition></LandlordRoute>} />
         <Route path="/listings/edit/:id" element={<LandlordRoute><PageTransition><CreateListingPage /></PageTransition></LandlordRoute>} />
         <Route path="/favorites" element={<PrivateRoute><PageTransition><FavoritesPage /></PageTransition></PrivateRoute>} />
+        <Route path="/history" element={<PrivateRoute><PageTransition><HistoryPage /></PageTransition></PrivateRoute>} />
         <Route path="/chats" element={<PrivateRoute><PageTransition><ChatsPage /></PageTransition></PrivateRoute>} />
         <Route path="/chats/:id" element={<PrivateRoute><PageTransition><ChatsPage /></PageTransition></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><PageTransition><ProfilePage /></PageTransition></PrivateRoute>} />
