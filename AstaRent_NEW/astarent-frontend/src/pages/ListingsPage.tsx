@@ -9,6 +9,7 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Сначала новые' },
   { value: 'price_asc', label: 'Цена: по возрастанию' },
   { value: 'price_desc', label: 'Цена: по убыванию' },
+  { value: 'rating', label: 'По рейтингу арендодателя' },
 ]
 
 export default function ListingsPage() {
