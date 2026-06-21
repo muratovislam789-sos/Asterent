@@ -85,4 +85,13 @@ export const historyApi = {
   clear: () => api.delete('/history'),
 };
 
+export const reviewsApi = {
+  getForLandlord: (landlordId: string) =>
+    api.get(`/reviews/landlord/${landlordId}`),
+  create: (data: { landlordId: string; listingId?: string; rating: number; comment?: string }) =>
+    api.post('/reviews', data),
+  delete: (id: string) =>
+    api.delete(`/reviews/${id}`),
+};
+
 export default api;

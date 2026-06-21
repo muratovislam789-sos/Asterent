@@ -15,6 +15,7 @@ import authRoutes from './routes/auth'
 import listingRoutes from './routes/listings'
 import chatRoutes from './routes/chats'
 import historyRoutes from './routes/history'
+import reviewRoutes from './routes/reviews'
 
 const app = express()
 const httpServer = createServer(app)
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/listings', listingRoutes)
 app.use('/api/chats', chatRoutes)
 app.use('/api/history', historyRoutes)
+app.use('/api/reviews', reviewRoutes)
 
 app.get('/api/health', async (_, res) => {
   try {

@@ -10,6 +10,8 @@ export interface User {
   avatar?: string;
   role: UserRole;
   createdAt: string;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 export interface AuthState {
@@ -104,6 +106,26 @@ export interface CreateListingDto {
   totalFloors: number;
   area: number;
   amenities: Amenities;
+}
+
+// ─── Reviews ──────────────────────────────────────────────────────────────────
+
+export interface Review {
+  id: string;
+  landlordId: string;
+  authorId: string;
+  listingId?: string | null;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  author: Pick<User, 'id' | 'name' | 'avatar'>;
+}
+
+export interface CreateReviewDto {
+  landlordId: string;
+  listingId?: string;
+  rating: number;
+  comment?: string;
 }
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
