@@ -14,6 +14,7 @@ import { chatRepository } from './repositories/chatRepository'
 import authRoutes from './routes/auth'
 import listingRoutes from './routes/listings'
 import chatRoutes from './routes/chats'
+import historyRoutes from './routes/history'
 
 const app = express()
 const httpServer = createServer(app)
@@ -32,6 +33,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
 app.use('/api/auth', authRoutes)
 app.use('/api/listings', listingRoutes)
 app.use('/api/chats', chatRoutes)
+app.use('/api/history', historyRoutes)
 
 app.get('/api/health', async (_, res) => {
   try {
@@ -42,34 +44,24 @@ app.get('/api/health', async (_, res) => {
   }
 })
 
-// 404 — маршрут не найден
 app.use((_req: any, res: any) => {
   res.status(404).json({ success: false, error: 'Маршрут не найден' })
 })
 
-// Глобальный обработчик ошибок — последняя линия защиты.
-// Ловит любую ошибку, не пойманную внутри контроллеров (например ошибки multer,
-// синтаксические ошибки в JSON теле запроса, неожиданные исключения).
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error('Unhandled error:', err)
-
-  // Ошибка лимита размера файла от multer
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({ success: false, error: 'Файл слишком большой (максимум 5 МБ)' })
   }
-
-  // Ошибка некорректного JSON в теле запроса
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ success: false, error: 'Некорректный формат данных запроса' })
   }
-
   res.status(err.statusCode || 500).json({
     success: false,
     error: err.message || 'Внутренняя ошибка сервера',
   })
 })
 
-// Перехват необработанных исключений и промисов — чтобы процесс не падал молча
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Promise Rejection:', reason)
 })
@@ -77,7 +69,6 @@ process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err)
 })
 
-// WebSocket
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token
   if (!token) return next(new Error('Auth required'))
