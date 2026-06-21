@@ -6,6 +6,8 @@ import { Listing } from '@/types'
 import { useAuthStore } from '@/store/authStore'
 import { useListingsStore } from '@/store/listingsStore'
 import { useChatStore } from '@/store/chatStore'
+import { StarRating } from '@/components/ui/StarRating'
+import ReviewsSection from '@/components/ui/ReviewsSection'
 
 const API_URL = 'http://localhost:5000'
 
@@ -165,6 +167,16 @@ export default function ListingDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Отзывы об арендодателе */}
+          {listing.landlord?.id && (
+            <ReviewsSection
+              landlordId={listing.landlord.id}
+              listingId={listing.id}
+              averageRating={listing.landlord.averageRating || 0}
+              reviewCount={listing.landlord.reviewCount || 0}
+            />
+          )}
         </div>
 
         {/* Правая колонка */}
@@ -212,6 +224,11 @@ export default function ListingDetailPage() {
                 </p>
               </div>
             </div>
+            {(listing.landlord?.reviewCount ?? 0) > 0 && (
+              <div className="mt-3">
+                <StarRating value={listing.landlord?.averageRating || 0} reviewCount={listing.landlord?.reviewCount} size={14} />
+              </div>
+            )}
             {listing.landlord?.phone && (
               <a href={'tel:' + listing.landlord.phone} className="block mt-4 text-sm text-primary-600 font-medium hover:underline">
                 {listing.landlord.phone}
