@@ -1,5 +1,6 @@
 import { listingRepository } from '../repositories/listingRepository'
-import { ListingFilters, CreateListingDTO } from '../models/Listing'
+import { viewHistoryService } from './viewHistoryService'
+import { ListingFilters } from '../models/Listing'
 import { AppError } from './authService'
 
 export const listingService = {
@@ -12,6 +13,10 @@ export const listingService = {
     if (!listing) {
       throw new AppError('Объявление не найдено', 404)
     }
+    // Записываем в историю просмотров, только если пользователь авторизован
+    if (userId) {
+      await viewHistoryService.recordView(userId, id)
+    }
     return listing
   },
 
@@ -20,7 +25,6 @@ export const listingService = {
   },
 
   async create(landlordId: string, dto: any, photos: string[]) {
-    // Бизнес-правило: обязательные поля для объявления
     if (!dto.title || !dto.price || !dto.district || !dto.address || !dto.area) {
       throw new AppError('Заполните все обязательные поля')
     }
@@ -32,7 +36,6 @@ export const listingService = {
     if (!existing) {
       throw new AppError('Объявление не найдено', 404)
     }
-    // Бизнес-правило: редактировать может только владелец объявления
     if (existing.landlord.id !== userId) {
       throw new AppError('Нет прав на редактирование', 403)
     }
