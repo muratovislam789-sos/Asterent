@@ -31,8 +31,8 @@ export default function ReviewsSection({ landlordId, listingId, averageRating = 
   const load = () => {
     setLoading(true)
     reviewsApi.getForLandlord(landlordId)
-      .then(r => setReviews(r.data.data))
-      .catch(() => {})
+      .then(r => setReviews(r.data.data?.reviews || []))
+      .catch(() => setReviews([]))
       .finally(() => setLoading(false))
   }
 
