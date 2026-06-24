@@ -32,7 +32,7 @@ export default function HomePage() {
     <div>
       {/* Hero */}
       <section className="relative h-[420px] md:h-[500px] overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600&h=900&fit=crop" alt="Астана" className="w-full h-full object-cover" />
+        <img src="https://i.pinimg.com/1200x/16/01/a1/1601a122fa2792080fd1e57c50abc8ab.jpg" alt="Астана" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight drop-shadow-lg">
