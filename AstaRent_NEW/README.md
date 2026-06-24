@@ -94,3 +94,4 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 
+<img width="865" height="494" alt="Снимок экрана 2026-06-24 102434" src="https://github.com/user-attachments/assets/3e919818-9080-41ae-abac-1e7f9da4eab5" />
