@@ -1,5 +1,5 @@
 
-https://www.figma.com/design/mI2EX77HeMrHjBlOViHhbD/Untitled?node-id=0-1&t=KFOUSbidElsPK2PE-1
+
 
 ====================================
   AstaRent — Запуск
@@ -32,9 +32,7 @@ cd C:\Users\Ислам\OneDrive\Desktop\AstaRent_FINAL\AstaRent_NEW\astarent-fro
 ====================================
 
 
--- ============================================
--- AstaRent — Структура базы данных
--- ============================================
+
 
 
 
