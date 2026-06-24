@@ -8,7 +8,7 @@ const DISTRICTS = [
   { name: 'Есиль', count: '120+', img: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&h=300&fit=crop' },
   { name: 'Алматы', count: '135+', img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop' },
   { name: 'Сарыарка', count: '100+', img: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop' },
-  { name: 'Байконур', count: '120+', img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop' },
+  { name: 'Байконур', count: '120+', img: '<img width="865" height="494" alt="Снимок экрана 2026-06-24 102434" src="https://github.com/user-attachments/assets/3e919818-9080-41ae-abac-1e7f9da4eab5" />' },
 ]
 
 export default function HomePage() {
